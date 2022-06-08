@@ -1,0 +1,123 @@
+### ビルドあり && Self-hosted runnerを起動するときに、何もPATHを設定しない場合
+### 
+
+name: Coverity with Self-Hosted Runner 3
+on: 
+  push:
+    branches: [ main ]
+
+  pull_request:
+    branches: [ main ]
+    
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: [self-hosted]
+
+    env:
+      COVERITY_URL: ${{ secrets.COVERITY_URL }}
+      COV_USER: ${{ secrets.COVERITY_USER }}
+      COVERITY_PASSPHRASE: ${{ secrets.COVERITY_PASSPHRASE }}
+      coverity_Stream_Name: Test_3          # Arbitrary project stream name
+      coverity_Build_Command: mvn compile   # Native build command
+      cov_build_options: --config /home/yukoueda/Desktop/Coverity/Analysis/Test_1/coverity_config.xml
+      coverity_checkers: --all --sigma disable --disable-spotbugs # --webapp-security
+      security_gate_view_name: gate
+      coverity_Project_Name: coverity_githubaction
+    
+    ### For "Upload SARIF file"  ###
+    permissions:
+      # required for all workflows
+      security-events: write
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
+    ### For "Upload SARIF file"  ###
+    
+    steps:
+      - uses: actions/checkout@v3
+      - name: Coverity Scan (Full analysis)
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+        if: ${{ github.event_name != 'pull_request' }}
+        shell: bash
+        run: |
+          export PATH=/home/yukoueda/Desktop/Coverity/Analysis/cov-analysis-linux64-2022_3_0/bin:$PATH
+          cov-build --dir idir $cov_build_options $coverity_Build_Command
+          #cov-capture --dir idir --project-dir .
+          cov-analyze --dir idir --strip-path `pwd` $coverity_checkers
+          cov-commit-defects --dir idir --ticker-mode none --url $COVERITY_URL --user $COV_USER --password $COVERITY_PASSPHRASE --on-new-cert trust --stream \
+              $coverity_Stream_Name --scm git --description "GitHub Workflow $GITHUB_WORKFLOW for $GITHUB_REPO" --version $GITHUB_SHA
+          cov-format-errors --dir idir --json-output-v7 coverity-results.json
+          
+      - name: Get Pull Request Changeset
+        if: ${{ github.event_name == 'pull_request' }}
+        id: changeset
+        #uses: jitterbit/get-changed-files@v1      ###Using jitterbit/get-changed-files@v1, it was failed.
+        uses: Ana06/get-changed-files@v1.2
+        
+      - name: Coverity Scan (Incremental analysis)
+        if: ${{github.event_name == 'pull_request'}}
+        run: |
+          export PATH=/home/yukoueda/Desktop/Coverity/Analysis/cov-analysis-linux64-2022_3_0/bin:$PATH
+          for changed_file in ${{ steps.changeset.outputs.added_modified }}; do
+            echo ${changed_file} >> coverity-files-to-scan.txt
+            echo "Scan changed file ${changed_file}."
+          done
+          cov-capture --dir idir --project-dir .   ## passする
+          #cov-run-desktop --setup --url $COVERITY_URL --stream $coverity_Stream_Name --reference-snapshot latest $coverity_Build_Command   ## failする, Cvoverity.confは未設定
+          cov-run-desktop --dir idir --strip-path `pwd` --url $COVERITY_URL --stream $coverity_Stream_Name --present-in-reference false \
+            --ignore-uncapturable-inputs true \
+            --json-output-v7 coverity-results.json \
+            $coverity_checkers \
+            ${{ steps.changeset.outputs.added_modified }}
+            
+      - name: Coverity Pull Request Feedback
+        if: ${{github.event_name == 'pull_request'}}
+        uses: synopsys-sig/coverity-report-output-v7-json@v0.1.0
+        env: 
+          PATH: /home/yukoueda/Desktop/Coverity/Analysis/cov-analysis-linux64-2022_3_0/bin
+        with:
+          # The following parameters are REQUIRED
+          json-file-path: ./coverity-results.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # If the following optional parameters are specified, the results from the JSON output will be
+          # compared to the baseline issues in the specified project, and only NEW issues will be reported
+          # in the pull request.
+          coverity-url: ${{ secrets.COVERITY_URL }}
+          coverity-project-name: ${coverity_Project_Name}
+          coverity-username: ${{ secrets.COVERITY_USER }}
+          coverity-password: ${{ secrets.COVERITY_PASSPHRASE }}
+
+      - name: Export Coverity Results to SARIF
+        shell: bash
+        run: |
+          export PATH=/home/yukoueda/Desktop/Coverity/Analysis/cov-analysis-linux64-2022_3_0/node/bin:$PATH  ## added by Ueda
+          echo
+          echo ========================================================================================
+          echo == Generate SARIF for Coverity results $GITHUB_REPOSITORY 
+          echo ========================================================================================
+          echo
+          #COV_ANALYZE_PATH=`which cov-analyze`
+          #COVERITY_HOME=`dirname $COV_ANALYZE_PATH`
+          node /home/yukoueda/Desktop/Coverity/Analysis/cov-analysis-linux64-2022_3_0/SARIF/cov-format-sarif-for-github.js \
+            --inputFile coverity-results.json \
+            --repoName $GITHUB_REPOSITORY \
+            --checkoutPath $GITHUB_REPOSITORY `pwd` $GITHUB_SHA \
+            --outputFile synopsys-coverity-github-sarif.json
+            
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2    ### v2はv1だったがそれだとエラーになる
+        with:
+          # Path to SARIF file relative to the root of the repository
+          sarif_file: synopsys-coverity-github-sarif.json          
+     
+      - name: Archive Coverity Intermediate Directory
+        if: ${{ inputs.diagnostic-mode == 'true' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverity-idir
+          path: idir
