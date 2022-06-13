@@ -20,7 +20,7 @@ jobs:
       COV_USER: ${{ secrets.COVERITY_USER }}
       COVERITY_PASSPHRASE: ${{ secrets.COVERITY_PASSPHRASE }}
       coverity_Stream_Name: Test_3          # Arbitrary project stream name
-      coverity_Build_Command: mvn compile   # Native build command
+      coverity_Build_Command: mvn clean install   # Native build command
       cov_build_options: --config /home/yukoueda/Desktop/Coverity/Analysis/Test_1/coverity_config.xml
       coverity_checkers: --all --sigma disable --disable-spotbugs # --webapp-security
       security_gate_view_name: gate
@@ -37,11 +37,13 @@ jobs:
     
     steps:
       - uses: actions/checkout@v3
-      - name: Coverity Scan (Full analysis)
+      - name: Setup Java compilation enviroment
         uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'adopt'
+      
+      - name: Coverity Scan (Full analysis)
         if: ${{ github.event_name != 'pull_request' }}
         shell: bash
         run: |
