@@ -1,7 +1,7 @@
 ### ビルドあり && Self-hosted runnerを起動するときに、何もPATHを設定しない場合
 ### 
 
-name: Coverity with Self-Hosted Runner 4
+name: 4 Coverity with Self-Hosted Runner
 on: 
   push:
     branches: [ main ]
