@@ -25,14 +25,15 @@ jobs:
       coverity_checkers: --all --sigma disable --disable-spotbugs # --webapp-security
       security_gate_view_name: gate
       coverity_Project_Name: coverity_githubaction
+      github-token: ${{ secrets.GITHUB_TOKEN }}
     
     ### For "Upload SARIF file"  ###
     permissions:
       # required for all workflows
       security-events: write
-      # only required for workflows in private repositories
-      actions: read
-      contents: read
+      ## only required for workflows in private repositories
+      #actions: read
+      #contents: read
     ### For "Upload SARIF file"  ###
     
     steps:
