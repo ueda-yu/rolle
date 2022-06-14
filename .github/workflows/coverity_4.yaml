@@ -25,7 +25,7 @@ jobs:
       coverity_checkers: --all --sigma disable --disable-spotbugs # --webapp-security
       security_gate_view_name: gate
       coverity_Project_Name: coverity_githubaction
-      github_token: ${{ secrets.GITHUB_TOKEN }}
+      #github_token: ${{ secrets.GITHUB_TOKEN }}
     
     ### For "Upload SARIF file"  ###
     permissions:
@@ -38,6 +38,11 @@ jobs:
     
     steps:
       - uses: actions/checkout@v3
+      
+      - uses: ouzi-dev/commit-status-updater@v1.1.0
+        with:
+          name: "Coverity Policy Check"
+          
       - name: Setup Java compilation enviroment 
         uses: actions/setup-java@v3
         with:
