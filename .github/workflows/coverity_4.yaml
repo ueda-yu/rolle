@@ -38,10 +38,6 @@ jobs:
     
     steps:
       - uses: actions/checkout@v3
-      
-      - uses: ouzi-dev/commit-status-updater@v1.1.0
-        with:
-          name: "Coverity Policy Check"
           
       - name: Setup Java compilation enviroment 
         uses: actions/setup-java@v3
@@ -188,7 +184,7 @@ jobs:
           name: coverity-idir
           path: idir
           
-      - uses: ouzi-dev/commit-status-updater@v1.1.0
-        with:
-          name: "Coverity Policy Check"
-          status: "${{ env.SECURITY_GATE_STATUS }}"
+      #- uses: ouzi-dev/commit-status-updater@v1.1.0
+      #  with:
+      #    name: "Coverity Policy Check"
+      #    status: "${{ env.SECURITY_GATE_STATUS }}"
