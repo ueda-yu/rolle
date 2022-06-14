@@ -118,7 +118,7 @@ jobs:
           sarif_file: synopsys-coverity-github-sarif.json          
       
       - name: Coverity Security Gate (Full analysis)
-        if: ${{ github.event_name != 'pull_request' }} and $security_gate_view_name != ""
+        if: ${{ github.event_name != 'pull_request' }}
         shell: bash
         run: |
           echo
@@ -137,14 +137,8 @@ jobs:
             echo Security gate found policy violations
             cat security-gate-results.json | jq .viewContentsV1.rows
             echo "SECURITY_GATE_STATUS=failure" >> $GITHUB_ENV
-            echo
-            echo ==  FAILE ==
-            echo
           else
             echo "SECURITY_GATE_STATUS=success" >> $GITHUB_ENV
-            echo
-            echo ==  SUCCESS ==
-            echo
           fi
             #  env:
             #    COV_USER: ${{ inputs.coverity-user }}
