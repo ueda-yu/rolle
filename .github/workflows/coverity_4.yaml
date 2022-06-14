@@ -25,7 +25,7 @@ jobs:
       coverity_checkers: --all --sigma disable --disable-spotbugs # --webapp-security
       security_gate_view_name: gate
       coverity_Project_Name: coverity_githubaction
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+      github_token: ${{ secrets.GITHUB_TOKEN }}
     
     ### For "Upload SARIF file"  ###
     permissions:
@@ -38,11 +38,11 @@ jobs:
     
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Java compilation enviroment
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'adopt'
+      #- name: Setup Java compilation enviroment mvn clean installはこれを使用しても失敗する。
+      #  uses: actions/setup-java@v3
+      #  with:
+      #    java-version: '11'
+      #    distribution: 'adopt'
       
       - name: Coverity Scan (Full analysis)
         if: ${{ github.event_name != 'pull_request' }}
