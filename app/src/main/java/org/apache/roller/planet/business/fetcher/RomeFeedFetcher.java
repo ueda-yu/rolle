@@ -146,11 +146,9 @@ public class RomeFeedFetcher implements FeedFetcher {
             // some kludge to handle feeds with no entry dates
             if (newEntry.getPubTime() == null) {
                 log.debug("No published date, assigning fake date for "+feedURL);
-			else{
                 newEntry.setPubTime(new Timestamp(cal.getTimeInMillis()));
-                cal.add(Calendar.DATE, -1);}
+                cal.add(Calendar.DATE, -1);
             }
-            
             newSub.addEntry(newEntry);
         }
         
