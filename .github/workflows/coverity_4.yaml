@@ -118,7 +118,7 @@ jobs:
           sarif_file: synopsys-coverity-github-sarif.json          
       
       - name: Coverity Security Gate (Full analysis)
-        if: ${{ github.event_name != 'pull_request' }} and ${security_gate_view_name} != ""
+        if: ${{ github.event_name != 'pull_request' }} and $security_gate_view_name != ""
         shell: bash
         run: |
           echo
@@ -131,7 +131,7 @@ jobs:
           #else
           #  export COVERITY_PROJECT_NAME=${coverity_Project_Name}
           #fi
-          COVERITY_VIEW_ESCAPED=`jq -rn --arg x "${{ security_gate_view_name}}" '$x|@uri'`
+          COVERITY_VIEW_ESCAPED=`jq -rn --arg x "$security_gate_view_name" '$x|@uri'`
           curl -kfLsS --user $COV_USER:$COVERITY_PASSPHRASE $COVERITY_URL/api/viewContents/issues/v1/$COVERITY_VIEW_ESCAPED?projectId=$coverity_Project_Name > security-gate-results.json
           if [ $(cat security-gate-results.json | jq .viewContentsV1.totalRows) -ne 0 ]; then
             echo Security gate found policy violations
@@ -158,7 +158,7 @@ jobs:
           #  if [ "${{ inputs.coverity-stream-name }}" == "" ]; then
           #    export COVERITY_STREAM_NAME=${GITHUB_REPOSITORY##*/}-$BASE_BRANCH
           #  else
-          #    export COVERITY_STREAM_NAME=${security_gate_view_name}
+          #    export COVERITY_STREAM_NAME=$security_gate_view_name
           #  fi
           cov-commit-defects --dir idir --url $COVERITY_URL --preview-report-v2 preview-report.json --stream $coverity_Stream_Name
           NUM_NEW_DEFECTS=`cat preview-report.json | jq -re .issueInfo[].presentInComparisonSnapshot | grep false | wc -l || true`
