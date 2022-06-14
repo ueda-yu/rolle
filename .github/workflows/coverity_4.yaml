@@ -140,9 +140,9 @@ jobs:
           else
             echo "SECURITY_GATE_STATUS=success" >> $GITHUB_ENV
           fi
-      #  env:
-      #    COV_USER: ${{ inputs.coverity-user }}
-      #    COVERITY_PASSPHRASE: ${{ inputs.coverity-passphrase }}
+            #  env:
+            #    COV_USER: ${{ inputs.coverity-user }}
+            #    COVERITY_PASSPHRASE: ${{ inputs.coverity-passphrase }}
 
       # For a pull request, until the GitHub action supports this, we will run a preview commit
       # and check how many newly introduced issues are being reported.
@@ -155,11 +155,11 @@ jobs:
           echo == Check security gate for local analysis results
           echo ========================================================================================
           echo
-        #  if [ "${{ inputs.coverity-stream-name }}" == "" ]; then
-        #    export COVERITY_STREAM_NAME=${GITHUB_REPOSITORY##*/}-$BASE_BRANCH
-        #  else
-        #    export COVERITY_STREAM_NAME=${{ security-gate-view-name }}
-        #  fi
+          #  if [ "${{ inputs.coverity-stream-name }}" == "" ]; then
+          #    export COVERITY_STREAM_NAME=${GITHUB_REPOSITORY##*/}-$BASE_BRANCH
+          #  else
+          #    export COVERITY_STREAM_NAME=${{ security-gate-view-name }}
+          #  fi
           cov-commit-defects --dir idir --url $COVERITY_URL --preview-report-v2 preview-report.json --stream $coverity_Stream_Name
           NUM_NEW_DEFECTS=`cat preview-report.json | jq -re .issueInfo[].presentInComparisonSnapshot | grep false | wc -l || true`
           if [ "$NUM_NEW_DEFECTS" -eq 0 ]; then
@@ -169,10 +169,10 @@ jobs:
             echo New defects found - failure
             echo ::save-state name=security_gate_status::failure
           fi
-      #  env:
-      #    BASE_BRANCH: ${{ github.base_ref }}
-      #    COV_USER: ${{ inputs.coverity-user }}
-      #    COVERITY_PASSPHRASE: ${{ inputs.coverity-passphrase }}
+          #  env:
+          #    BASE_BRANCH: ${{ github.base_ref }}
+          #    COV_USER: ${{ inputs.coverity-user }}
+          #    COVERITY_PASSPHRASE: ${{ inputs.coverity-passphrase }}
           
       - name: Archive Coverity Intermediate Directory
         if: ${{ inputs.diagnostic-mode == 'true' }}
