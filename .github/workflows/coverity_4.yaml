@@ -123,7 +123,7 @@ jobs:
         run: |
           echo
           echo ========================================================================================
-          echo == Check security gate for project ${GITHUB_REPOSITORY##*/}: $SECURITY_GATE_VIEW
+          echo == Check security gate for project coverity_Project_Name: $security_gate_view_name
           echo ========================================================================================
           echo
           #if [ "${{ inputs.coverity-project-name }}" == "" ]; then
@@ -137,8 +137,14 @@ jobs:
             echo Security gate found policy violations
             cat security-gate-results.json | jq .viewContentsV1.rows
             echo "SECURITY_GATE_STATUS=failure" >> $GITHUB_ENV
+            echo
+            echo ==  FAILE ==
+            echo
           else
             echo "SECURITY_GATE_STATUS=success" >> $GITHUB_ENV
+            echo
+            echo ==  SUCCESS ==
+            echo
           fi
             #  env:
             #    COV_USER: ${{ inputs.coverity-user }}
