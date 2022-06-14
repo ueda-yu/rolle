@@ -142,7 +142,7 @@ public class RomeFeedFetcher implements FeedFetcher {
         List<SyndEntry> feedEntries = feed.getEntries();
         for (SyndEntry feedEntry : feedEntries) {
             SubscriptionEntry newEntry = buildEntry(feedEntry);
-            
+            newEntry.getPubTime();
             // some kludge to handle feeds with no entry dates
             if (newEntry.getPubTime() == null) {
                 log.debug("No published date, assigning fake date for "+feedURL);
