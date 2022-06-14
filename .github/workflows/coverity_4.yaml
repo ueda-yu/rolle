@@ -49,6 +49,7 @@ jobs:
         shell: bash
         run: |
           export PATH=/home/yukoueda/Desktop/Coverity/Analysis/cov-analysis-linux64-2022_3_0/bin:$PATH
+          mvn clean
           cov-build --dir idir $cov_build_options $coverity_Build_Command
           #cov-capture --dir idir --project-dir .
           cov-analyze --dir idir --strip-path `pwd` $coverity_checkers
