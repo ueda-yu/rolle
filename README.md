@@ -1,6 +1,6 @@
 ＃SAML
 
-SAMLの結果はSecurityタブのsoftawre
+SAMLの結果はSecurityタブのcode scanning
 
 # Apache Roller
 
